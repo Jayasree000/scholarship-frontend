@@ -1,0 +1,122 @@
+.manage-listings {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    color: var(--pk-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--pk-surface-2);
+    color: var(--pk-text-primary);
+}
+
+.btn-icon.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--pk-danger);
+}
+
+.add-scholarship-form {
+    padding: 2rem;
+    border-color: var(--pk-primary);
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease-out forwards;
+    transform-origin: top center;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-1rem) scaleY(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
+.form-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--pk-border);
+}
+
+.grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.grid-full {
+    grid-column: 1 / -1;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--pk-border);
+}
+
+.admin-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.admin-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--pk-border-light);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.stat-row .label {
+    color: var(--pk-text-secondary);
+}
+
+.stat-row .value {
+    color: var(--pk-text-primary);
+}
+
+@media (max-width: 768px) {
+    .grid-form {
+        grid-template-columns: 1fr;
+    }
+}
