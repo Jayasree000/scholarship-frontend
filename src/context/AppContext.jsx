@@ -1,54 +1,120 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { initialScholarships, initialApplications } from '../data/mockData';
+import api from '../api/axios';
 
 const AppContext = createContext();
 
 export const useAppContext = () => useContext(AppContext);
 
 export const AppProvider = ({ children }) => {
-    const [scholarships, setScholarships] = useState(initialScholarships);
-    const [applications, setApplications] = useState(initialApplications);
+    const [scholarships, setScholarships] = useState([]);
+    const [applications, setApplications] = useState([]);
     const [user, setUser] = useState(null); // null means not logged in
+    const [loading, setLoading] = useState(true);
 
     const login = (userData) => {
-        setUser(userData);
+        // Parse ID to number for backend mapping, defaults to 1 for student demo
+        const userId = userData.role === 'admin' ? 2 : 1; 
+        setUser({ ...userData, dbId: userId });
     };
 
     const logout = () => {
         setUser(null);
     };
 
-    // Student Actions
-    const applyForScholarship = (applicationData) => {
-        const newApp = {
-            id: `app-${Date.now()}`,
-            studentId: 'user-1', // Mocking a logged-in student
-            studentName: 'Alex Johnson',
-            status: 'pending',
-            appliedDate: new Date().toISOString().split('T')[0],
-            ...applicationData
+    // Load initial data from the backend
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const scholarshipsRes = await api.get('/scholarships');
+                setScholarships(scholarshipsRes.data);
+
+                // For demo purposes, we fetch all applications
+                const appsRes = await api.get('/scholarships/applications');
+                // Map the backend structure to the frontend structure
+                const mappedApps = appsRes.data.map(app => ({
+                    id: app.id,
+                    studentId: app.student?.id,
+                    studentName: app.student?.name || 'Unknown Student',
+                    scholarshipId: app.scholarship?.id,
+                    scholarshipTitle: app.scholarship?.title || 'Unknown Scholarship',
+                    status: app.status?.toLowerCase() || 'pending',
+                    appliedDate: app.appliedAt,
+                    coverLetter: app.coverLetter
+                }));
+                setApplications(mappedApps);
+            } catch (error) {
+                console.error("Error fetching data from API:", error);
+            } finally {
+                setLoading(false);
+            }
         };
-        setApplications([...applications, newApp]);
+
+        fetchInitialData();
+    }, []);
+
+    // Student Actions
+    const applyForScholarship = async (applicationData) => {
+        try {
+            const payload = {
+                student: { id: user?.dbId || 1 },
+                scholarship: { id: applicationData.scholarshipId },
+                coverLetter: applicationData.coverLetter
+            };
+            
+            const response = await api.post('/scholarships/apply', payload);
+            const savedApp = response.data;
+            
+            setApplications([...applications, {
+                id: savedApp.id,
+                studentId: savedApp.student?.id,
+                studentName: user?.name || 'Alex Johnson',
+                scholarshipId: savedApp.scholarship?.id,
+                scholarshipTitle: scholarships.find(s => s.id === savedApp.scholarship?.id)?.title || 'Scholarship',
+                status: 'pending',
+                appliedDate: savedApp.appliedAt,
+                coverLetter: savedApp.coverLetter
+            }]);
+            return true;
+        } catch (error) {
+            console.error("Failed to apply:", error);
+            return false;
+        }
     };
 
     // Admin Actions
-    const updateApplicationStatus = (appId, newStatus) => {
-        setApplications(applications.map(app =>
-            app.id === appId ? { ...app, status: newStatus } : app
-        ));
+    const updateApplicationStatus = async (appId, newStatus) => {
+        try {
+            await api.put(`/scholarships/applications/${appId}/status`, newStatus);
+            setApplications(applications.map(app =>
+                app.id === appId ? { ...app, status: newStatus } : app
+            ));
+            return true;
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            return false;
+        }
     };
 
-    const addScholarship = (scholarshipData) => {
-        const newScholarship = {
-            id: `${Date.now()}`,
-            status: 'open',
-            ...scholarshipData
-        };
-        setScholarships([...scholarships, newScholarship]);
+    const addScholarship = async (scholarshipData) => {
+        try {
+            const response = await api.post('/scholarships', scholarshipData);
+            setScholarships([...scholarships, response.data]);
+            return true;
+        } catch (error) {
+            console.error("Failed to add scholarship:", error);
+            return false;
+        }
     };
 
-    const deleteScholarship = (id) => {
-        setScholarships(scholarships.filter(s => s.id !== id));
+    const deleteScholarship = async (id) => {
+        try {
+            await api.delete(`/scholarships/${id}`);
+            setScholarships(scholarships.filter(s => s.id !== id));
+            return true;
+        } catch (error) {
+            console.error("Failed to delete scholarship:", error);
+            return false;
+        }
     };
 
     return (
@@ -56,6 +122,7 @@ export const AppProvider = ({ children }) => {
             scholarships,
             applications,
             user,
+            loading,
             login,
             logout,
             applyForScholarship,
