@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { GraduationCap, LayoutDashboard, Search, Settings } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import './Navbar.css';
@@ -8,11 +8,12 @@ const Navbar = () => {
     const { user, logout } = useAppContext();
     const isAdmin = user?.role === 'admin';
     const isStudent = user?.role === 'student';
+    const navigate = useNavigate();
 
     return (
         <nav className="navbar glass-panel">
             <div className="container navbar-content">
-                <div className="navbar-brand">
+                <div className="navbar-brand" onClick={() => navigate(isAdmin ? '/admin/dashboard' : '/student/search')} style={{ cursor: 'pointer' }}>
                     <div className="logo-icon">
                         <GraduationCap size={24} color="var(--pk-primary)" />
                     </div>
@@ -20,6 +21,18 @@ const Navbar = () => {
                 </div>
 
                 <div className="navbar-links">
+                    {user && (
+                        <div className="user-profile-nav">
+                            <div className="user-avatar-mini">
+                                {user.name.charAt(0)}
+                            </div>
+                            <div className="user-meta-mini">
+                                <span className="user-name-mini">{user.name}</span>
+                                <span className="user-role-mini">{user.role}</span>
+                            </div>
+                            <div className="nav-vertical-divider"></div>
+                        </div>
+                    )}
                     {isAdmin && (
                         <>
                             <NavLink to="/admin/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

@@ -9,7 +9,7 @@ const ApplicationForm = () => {
     const navigate = useNavigate();
     const { scholarships, applyForScholarship } = useAppContext();
 
-    const scholarship = scholarships.find(s => s.id === id);
+    const scholarship = scholarships.find(s => s.id == id);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 

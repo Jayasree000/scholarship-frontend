@@ -58,7 +58,7 @@ export const AppProvider = ({ children }) => {
             const payload = {
                 student: { id: user?.dbId || 1 },
                 scholarship: { id: applicationData.scholarshipId },
-                coverLetter: applicationData.coverLetter
+                coverLetter: applicationData.essayText // Map essayText from form to coverLetter in DB
             };
             
             const response = await api.post('/scholarships/apply', payload);
